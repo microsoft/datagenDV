@@ -15,6 +15,7 @@ import re
 import ctypes
 import collections
 from enum import Enum, EnumMeta
+import dataclasses
 
 
 #                             (ctype,            std C type,   python type, python->ctype default lookup )
@@ -131,3 +132,40 @@ def write_defines(fh, defines):
     define_lines = [f"#define {name} ( {val} ) \n" for name,val in defines.items() ]
     fh.write("".join(define_lines))
     fh.write("\n")
+    
+    
+def _create_ctype_class(name, base, fields, pack=None):
+    class CtypesStruct(base):
+        _fields_ = fields
+        if pack is not None:
+          _pack_ = pack
+    CtypesStruct.__name__ = name
+    return CtypesStruct
+
+def _convert_hfields_to_fields(hfields):
+  fields = []
+  for field in hfields:
+    if issubclass(field[1], Enum):
+      fields.append( (field[0], ctypes.c_uint32))
+    else:
+      fields.append(field)
+  return fields
+
+
+def write_ctype_obj_binary(datagen_obj, filename):
+  """
+  Writes out a binary files of the data provided.
+  Requires datagen_obj to have called generate_hfields to define _hfields_.
+  datagen_obj must also be a "dataclass" class.
+  Currently there is limited nesting support. 
+  Character pointers and pointers in general are not supported. 
+  """
+  assert hasattr(datagen_obj, "_hfields_"), "Datagen objects which use ctypes should first call generate_hfields() before calling "
+  assert dataclasses.is_dataclass(datagen_obj), "Must pass in a dataclasses object"
+  
+  FrameData_ctype = _create_ctype_class(f'{datagen_obj.__class__.__name__}_ctypes', ctypes.Structure,
+                           _convert_hfields_to_fields(datagen_obj._hfields_))
+  myFrame_dict = {dc_field.name: getattr(datagen_obj,dc_field.name) for dc_field in dataclasses.fields(datagen_obj) }
+  myFrame_ctype = FrameData_ctype(**myFrame_dict)
+  with open(filename, 'wb') as fh:
+    fh.write(myFrame_ctype)
