@@ -15,6 +15,17 @@ import traceback
 from datagenDV.ctypes_helper import python2ctype, ctype2python
 
 
+def field(default, dir='in_out', **kwargs):
+  """Wrapper for dataclasses.field(). Dir sets the direction for loading and unloading"""
+  assert dir in ('in_out', 'in', 'out'), f"Invalid dir '{dir}'"
+  if dir=='in':
+    return in_only_field(default, **kwargs)
+  elif dir=='out':
+    return out_only_field(default, **kwargs)
+  elif dir=='in_out':
+    return yml_field(default, **kwargs)
+
+
 def yml_field(default, **kwargs):
     """In/out yaml parameter. Loads from yaml, outputs to yaml"""
     if callable(default):

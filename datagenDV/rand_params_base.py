@@ -8,7 +8,7 @@ Author: jonathan.george@microsoft.com
 Decorator and helper function for pyvsc yaml params classes
 
 """
-
+import vsc
 from vsc import constraint
 import dataclasses
 
@@ -16,6 +16,13 @@ def rand_field(rand_type, *args):
     assert callable(rand_type), "rand_type must be a callable class. \
         User is expected to pass in the class for the factory plus the arguments to call it"
     return dataclasses.field(init=False, repr=False, default_factory=lambda:rand_type(*args), metadata={'yml_dump_excluded':True})
+
+
+def rand_dataclass(cls):
+  cls = dataclasses.dataclass(cls)
+  cls = rand_YML_override(cls)
+  cls = vsc.randobj(cls)
+  return cls
 
 def rand_YML_override(cls):
     """
