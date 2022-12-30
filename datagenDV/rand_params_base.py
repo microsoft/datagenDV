@@ -11,14 +11,39 @@ Decorator and helper function for pyvsc yaml params classes
 import vsc
 from vsc import constraint
 import dataclasses
+from copy import copy
 
-def rand_field(rand_type, *args):
+#Deprecated
+def rand_field_seperate(rand_type, *args):
     assert callable(rand_type), "rand_type must be a callable class. \
         User is expected to pass in the class for the factory plus the arguments to call it"
     return dataclasses.field(init=False, repr=False, default_factory=lambda:rand_type(*args), metadata={'yml_dump_excluded':True})
 
+#TODO - Add yml direction handling
+def rand_field(rand_type, *args):
+    assert callable(rand_type), "rand_type must be a callable class. \
+        User is expected to pass in the class for the factory plus the arguments to call it"
+    return dataclasses.field(init=True, repr=True, default=None, 
+                            metadata={'rand_type': rand_type, 'rand_type_args': args})
 
 def rand_dataclass(cls):
+    cls_vars = copy(dict(vars(cls)))
+    for field_name, field_ in cls_vars.items():
+        # print(cls_field)
+        if not field_name.startswith("_") and type(field_) is dataclasses.Field:
+            assert(type(field_) is dataclasses.Field), f"All class fields must be of type dataclasses.Field. Recommened using the DatagenDV.rand_field wrapper. Failed on {field_name} with type {type(field_)}"
+            assert("rand_type" in field_.metadata), "All class fields must have metadata entry for rand_type. Recommened using the DatagenDV.rand_field wrapper"
+            rand_func = lambda metadata=field_.metadata: metadata["rand_type"]( *metadata.get("rand_type_args", {}) ) 
+            new_field = dataclasses.field(init=False, repr=False, default_factory=rand_func, metadata={'yml_dump_excluded':True})
+            setattr(cls, f"rand_{field_name}", new_field)
+            cls.__annotations__[f"rand_{field_name}"] = Ellipsis
+    cls = dataclasses.dataclass(cls)
+    cls = rand_YML_override(cls)
+    cls = vsc.randobj(cls)
+    return cls
+
+#Deprecated
+def rand_dataclass_seperate(cls):
   cls = dataclasses.dataclass(cls)
   cls = rand_YML_override(cls)
   cls = vsc.randobj(cls)
