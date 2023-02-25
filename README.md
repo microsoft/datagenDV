@@ -1,4 +1,4 @@
-# Project
+# DatagenDV
 
 DatagenDV is a Python framework for generating C compatible test stimulus using YAML and random
 constraints. The framework leverages multiple open-source projects by tying them together into base classes which can then be
