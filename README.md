@@ -1,14 +1,17 @@
 # Project
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+DatagenDV is a Python framework for generating C compatible test stimulus using YAML and random
+constraints. The framework leverages multiple open-source projects by tying them together into base classes which can then be
+extended by its users.
 
-As the maintainer of this project, please make a few updates:
+DatagenDV was made open source to provide an example of how python frameworks can be made with verifiation in mind. 
+Although designed to be generic and project agnostic, it is not intended for easy plug and play into any project infrastructure at this time. 
+It is one way of doing things and is aimed a particular flow.  
+DatagenDV is better utilized as an example and starting point.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+Please see the examples directory which contain Jupyter notebooks which explain and show how it is used.
+For a fuller explanation of DatagenDV's features see the 2023 DVCon paper. 
+
 
 ## Contributing
 
