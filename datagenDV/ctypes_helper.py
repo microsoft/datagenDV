@@ -113,18 +113,10 @@ def write_ctype_structs(fh, ctype_structs, use_hfields=False):
 
 def write_enum_type_defs(fh, enums):
     for enum_class in enums:
-        fh.write("\n")
-        fh.write("typedef enum {\n")
-        enum_vals = []
-        for enum_val in list(enum_class):
-            enum_vals.append(f"  {enum_val.name} = {enum_val.value}")
+        enum_vals = [f"  {enum_val.name} = {enum_val.value}" for enum_val in list(enum_class)]
+        enum_vals_str = ",\n".join(enum_vals)
+        fh.write(f"\ntypedef enum {{\n{enum_vals_str}\n}} {enum_class.__name__};\n\n")
 
-        fh.write(",\n".join(enum_vals))
-        fh.write("\n")
-
-        fh.write(f"}} {enum_class.__name__};\n")
-
-        fh.write("\n")
 
 
 def write_defines(fh, defines):
